@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>muhabbetkusudayi | Portfolio</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        
+        #portfolio-section { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        h1 { font-size: 3rem; color: #00d4ff; margin: 0; }
+        .projects { margin-top: 40px; }
+        .btn { padding: 15px 40px; background: rgba(255, 255, 255, 0.05); border: 1px solid #333; border-radius: 8px; color: #00d4ff; text-decoration: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+
+        #ai-section { display: none; width: 100%; height: 100%; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
+        
+        #error-msg { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #ff4444; font-size: 1.5rem; text-align: center; }
+        .back-btn { margin-top: 20px; font-size: 1rem; color: #888; text-decoration: underline; cursor: pointer; }
+
+        .loader { border: 4px solid #333; border-top: 4px solid #00d4ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; position: absolute; width: 100%; top: 0; left: 0; background: #0a0a0a; }
+    </style>
+</head>
+<body>
+
+    <div id="portfolio-section">
+        <h1>muhabbetkusudayi</h1>
+        <p>Software Developer</p>
+        <div class="projects">
+            <div class="btn" onclick="loadAI()">SerbetAI</div>
+        </div>
+    </div>
+
+    <div id="ai-section">
+        <div id="loading-screen">
+            <div class="loader"></div>
+            <p>Connecting to SerbetAI...</p>
+        </div>
+
+        <div id="error-msg">
+            <p>SerbetAI servers down, for this time.</p>
+            <div class="back-btn" onclick="goBack()">Back to Portfolio</div>
+        </div>
+
+        <iframe id="ai-frame" src="https://pale-oil-programs-timeline.trycloudflare.com"></iframe>
+    </div>
+
+    <script>
+        const portfolio = document.getElementById('portfolio-section');
+        const aiSection = document.getElementById('ai-section');
+        const frame = document.getElementById('ai-frame');
+        const error = document.getElementById('error-msg');
+        const loader = document.getElementById('loading-screen');
+        const url = "https://pale-oil-programs-timeline.trycloudflare.com";
+
+        function loadAI() {
+            portfolio.style.display = 'none';
+            aiSection.style.display = 'block';
+            loader.style.display = 'flex';
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            fetch(url, { mode: 'no-cors', signal: controller.signal })
+                .then(() => {
+                    clearTimeout(timeoutId);
+                    loader.style.display = 'none';
+                    frame.style.display = 'block';
+                })
+                .catch(() => {
+                    loader.style.display = 'none';
+                    error.style.display = 'flex';
+                });
+        }
+
+        function goBack() {
+            aiSection.style.display = 'none';
+            error.style.display = 'none';
+            frame.style.display = 'none';
+            portfolio.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
