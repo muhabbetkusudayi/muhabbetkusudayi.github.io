@@ -1,87 +1,445 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>muhabbetkusudayi | Portfolio</title>
+    <title>MuhabbetKusuDev | Engineering Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #0a0a0a; color: #ffffff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        
-        #portfolio-section { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        h1 { font-size: 3rem; color: #00d4ff; margin: 0; }
-        .projects { margin-top: 40px; }
-        .btn { padding: 15px 40px; background: rgba(255, 255, 255, 0.05); border: 1px solid #333; border-radius: 8px; color: #00d4ff; text-decoration: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.2);
+            --text-main: #ffffff;
+            --text-dim: #888888;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: 'Inter', sans-serif;
+        }
 
-        #ai-section { display: none; width: 100%; height: 100%; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; display: none; }
-        
-        #error-msg { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #ff4444; font-size: 1.5rem; text-align: center; }
-        .back-btn { margin-top: 20px; font-size: 1rem; color: #888; text-decoration: underline; cursor: pointer; }
+        [data-theme="light"] {
+            --bg: #f5f5f7;
+            --surface: #ffffff;
+            --glass: rgba(0, 0, 0, 0.02);
+            --border: rgba(0, 0, 0, 0.1);
+            --text-main: #000000;
+            --text-dim: #666666;
+            --accent: #0088cc;
+        }
 
-        .loader { border: 4px solid #333; border-top: 4px solid #00d4ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #loading-screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; position: absolute; width: 100%; top: 0; left: 0; background: #0a0a0a; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: crosshair;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: background 0.4s ease;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 212, 255, 0.02) 50%);
+            background-size: 100% 4px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 6%;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -1px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-items { display: flex; gap: 40px; }
+        .nav-items a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .nav-items a:hover { color: var(--accent); }
+
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 140px 10% 60px;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 30px;
+            letter-spacing: -4px;
+        }
+
+        .hero p {
+            max-width: 600px;
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 40px;
+            position: relative;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px -10px var(--accent-glow);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: 0.4s;
+            transform-origin: left;
+        }
+
+        .card:hover::before { transform: scaleX(1); }
+
+        .card-tag {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-link::after {
+            content: "→";
+            transition: 0.3s;
+        }
+
+        .card-link:hover::after { transform: translateX(5px); }
+
+        #serbet-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .overlay-header {
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #loader-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.6s infinite linear;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        #error-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 10px 25px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .about-content {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 60px;
+            border-radius: 2px;
+            max-width: 900px;
+        }
+
+        .about-content h2 {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-items { display: none; }
+            .hero h1 { font-size: 4rem; }
+            section { padding: 100px 5% 40px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="portfolio-section">
-        <h1>muhabbetkusudayi</h1>
-        <p>Software Developer</p>
-        <div class="projects">
-            <div class="btn" onclick="loadAI()">SerbetAI</div>
+    <div class="scanline"></div>
+
+    <nav>
+        <div class="logo">MUHABBETKUSU<span>DEV</span></div>
+        <div class="nav-items">
+            <a href="#home">Home</a>
+            <a href="#projects">Projects</a>
+            <a href="#about">About</a>
+            <a href="https://github.com/muhabbetkusudayi" target="_blank">GitHub</a>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="t-btn">LIGHT MODE</button>
+    </nav>
+
+    <div id="main-content">
+        <section id="home" class="hero">
+            <h1>Build.<br>Optimize.<br>Scale.</h1>
+            <p>I am a software engineer focused on building high-performance applications and minimal AI systems. Currently exploring the intersection of neural efficiency and clean architecture.</p>
+            <a href="#projects" class="btn-back" style="text-decoration: none;">View_Archive</a>
+        </section>
+
+        <section id="projects">
+            <h2 style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); margin-bottom: 20px;">// RECENT_RELEASES</h2>
+            <div class="grid">
+                <div class="card" style="border: 1px solid var(--accent);">
+                    <span class="card-tag">MINIMAL_AI</span>
+                    <h3>YahaaAI</h3>
+                    <p>Minimalist, lightning-fast artificial intelligence designed for specific timeline logic and neural responsiveness.</p>
+                    <a href="https://yahaa.muhabbetkusudev.workers.dev/" class="card-link">Connect to Yahaa</a>
+                </div>
+
+                <div class="card">
+                    <span class="card-tag">BROWSER</span>
+                    <h3>Cysra Anome</h3>
+                    <p>Fast, Private, Secure. An local privacy-first lightweight minimalistic browser.</p>
+                    <a href="https://github.com/muhabbetkusudayi/Cysra-Anome" class="card-link">Download</a>
+                </div>
+
+                <div class="card">
+                    <span class="card-tag">EXTENSION</span>
+                    <h3>TrafficTube</h3>
+                    <p>Do not watch any clickbait and low IQ videos again. With TrafficTube, you can spot any clickbaiters.</p>
+                    <a href="https://github.com/muhabbetkusudayi/TrafficTube" class="card-link">Download</a>
+                </div>
+
+                <div class="card">
+                    <span class="card-tag">COPY_SITE</span>
+                    <h3>ComoCopy</h3>
+                    <p>If its close source, dont worry. You can copy any static site to make sure that site isnt malicious. This project was made for educational purposes.</p>
+                    <a href="https://github.com/muhabbetkusudayi/ComoCopy" class="card-link">Download</a>
+                </div>
+
+                <div class="card">
+                    <span class="card-tag">FOOTBALL</span>
+                    <h3>fenerversusgala</h3>
+                    <p>Nostalgia is good, because of that; We made fenerversusgala. You can see 1959-present matches of Gala vs Fenerbahce.</p>
+                    <a href="https://muhabbetkusudayi.github.io/fenerversusgala/" class="card-link">Go to fenerversusgala</a>
+                </div>
+                <div class="card">
+                    <span class="card-tag">RULES</span>
+                    <h3>Legal</h3>
+                    <p>If you visit this site, you accept that.</p>
+                    <a href="legal.html" class="card-link">Go to legal</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="about-content">
+                <h2>// BIO</h2>
+                <p style="font-size: 1.3rem; margin-bottom: 30px;">
+                    Developing at the edge of performance. My approach is rooted in simplicity, removing the noise to let the core functionality shine.
+                </p>
+                <p style="color: var(--text-dim);">
+                    Proffesional at Python, system architecture, and UI/UX that feels like a natural extension of the user. I believe in code that is as beautiful as the interface it powers.
+                </p>
+            </div>
+        </section>
     </div>
 
-    <div id="ai-section">
-        <div id="loading-screen">
-            <div class="loader"></div>
-            <p>Connecting to SerbetAI...</p>
+    <div id="serbet-overlay">
+        <div class="overlay-header">
+            <div class="logo">SERBET<span>AI</span></div>
+            <button class="btn-back" onclick="closeSerbet()">DISCONNECT</button>
         </div>
-
-        <div id="error-msg">
-            <p>SerbetAI servers down, for this time.</p>
-            <div class="back-btn" onclick="goBack()">Back to Portfolio</div>
+        <div id="loader-container">
+            <div id="active-loader">
+                <div class="loader" style="margin: 0 auto 20px;"></div>
+                <p style="font-family: var(--font-mono); font-size: 0.8rem;">Initializing secure handshake...</p>
+            </div>
+            <div id="error-screen">
+                <h2 style="color: #ff3e3e; margin-bottom: 10px; font-family: var(--font-mono);">CONNECTION_FAILED</h2>
+                <p style="color: var(--text-dim); margin-bottom: 25px;">SerbetAI servers down, for this time.</p>
+                <button class="btn-back" onclick="closeSerbet()">Return to Interface</button>
+            </div>
         </div>
-
-        <iframe id="ai-frame" src="https://pale-oil-programs-timeline.trycloudflare.com"></iframe>
+        <iframe id="serbet-frame" src=""></iframe>
     </div>
 
     <script>
-        const portfolio = document.getElementById('portfolio-section');
-        const aiSection = document.getElementById('ai-section');
-        const frame = document.getElementById('ai-frame');
-        const error = document.getElementById('error-msg');
-        const loader = document.getElementById('loading-screen');
-        const url = "https://pale-oil-programs-timeline.trycloudflare.com";
-
-        function loadAI() {
-            portfolio.style.display = 'none';
-            aiSection.style.display = 'block';
-            loader.style.display = 'flex';
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-            fetch(url, { mode: 'no-cors', signal: controller.signal })
-                .then(() => {
-                    clearTimeout(timeoutId);
-                    loader.style.display = 'none';
-                    frame.style.display = 'block';
-                })
-                .catch(() => {
-                    loader.style.display = 'none';
-                    error.style.display = 'flex';
-                });
+        function toggleTheme() {
+            const doc = document.documentElement;
+            const btn = document.getElementById('t-btn');
+            const isDark = doc.getAttribute('data-theme') === 'dark';
+            doc.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            btn.innerText = isDark ? 'DARK MODE' : 'LIGHT_MODE';
         }
 
-        function goBack() {
-            aiSection.style.display = 'none';
+        async function launchSerbet() {
+            const overlay = document.getElementById('serbet-overlay');
+            const loader = document.getElementById('active-loader');
+            const error = document.getElementById('error-screen');
+            const frame = document.getElementById('serbet-frame');
+            const endpoint = "https://serbetai.muhabbetkusudev.workers.dev/";
+
+            overlay.style.display = 'flex';
+            loader.style.display = 'block';
             error.style.display = 'none';
             frame.style.display = 'none';
-            portfolio.style.display = 'flex';
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+
+            try {
+                await fetch(endpoint, { mode: 'no-cors', signal: controller.signal });
+                clearTimeout(timeout);
+                loader.style.display = 'none';
+                frame.src = endpoint;
+                frame.style.display = 'block';
+            } catch (e) {
+                loader.style.display = 'none';
+                error.style.display = 'block';
+            }
         }
+
+        function closeSerbet() {
+            const overlay = document.getElementById('serbet-overlay');
+            const frame = document.getElementById('serbet-frame');
+            overlay.style.display = 'none';
+            frame.src = "";
+        }
+
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.style.height = '60px';
+                nav.style.background = 'rgba(0,0,0,0.8)';
+            } else {
+                nav.style.height = '80px';
+                nav.style.background = 'transparent';
+            }
+        });
     </script>
 </body>
 </html>
