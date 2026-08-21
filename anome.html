@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cysra Anome — a PyQt5 browser for people who like to see how things work</title>
+<meta name="description" content="Cysra Anome 8.0. A PyQt5 + Chromium desktop browser with a built-in ad blocker, command palette, and a panel of micro-apps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  h1, h2, h3, p { margin: 0; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; background: none; border: none; }
+  img, svg { display: block; max-width: 100%; }
+  code { font-family: var(--font-mono); }
+}
+
+@layer tokens {
+  :root {
+    --bg: #EDEEE8;
+    --surface: #FBFBF8;
+    --ink: #1C1E17;
+    --ink-dim: #64665B;
+    --ink-faint: #9A9C8E;
+    --line: #C7C9BB;
+    --line-strong: #A8AB99;
+    --accent: #3C5A3B;
+    --accent-ink: #F4F5EE;
+    --status-archived: #8A5A2E;
+    --status-ref: #5B5E51;
+    --focus: #2F6FED;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Source Sans 3', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --measure: 62ch;
+    --edge: clamp(20px, 5vw, 64px);
+
+    --dur: 0.15s;
+    --ease: ease-out;
+  }
+
+  [data-theme="dark"] {
+    --bg: #17190F;
+    --surface: #1E2015;
+    --ink: #EDEFE4;
+    --ink-dim: #A6A896;
+    --ink-faint: #6E7061;
+    --line: #3A3D26;
+    --line-strong: #4C4F33;
+    --accent: #8FB984;
+    --accent-ink: #14150D;
+    --status-archived: #D0925B;
+    --status-ref: #A6A896;
+    --focus: #7FB0FF;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root { --dur: 0s; }
+  }
+}
+
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  a { text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+}
+
+@layer layout {
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .masthead-row {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px var(--edge);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 var(--edge);
+  }
+
+  .intro {
+    padding: 64px 0 40px;
+    max-width: 760px;
+  }
+
+  .get-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: 40px;
+    padding: 28px 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+  }
+
+  .features {
+    padding: 56px 0 24px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 24px;
+  }
+
+  .feature-cell {
+    background: var(--surface);
+    padding: 26px 28px;
+  }
+
+  .panel-section {
+    padding: 56px 0 24px;
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+  }
+
+  .panel-list {
+    margin-top: 24px;
+    display: grid;
+  }
+
+  .keys-section {
+    padding: 56px 0 24px;
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+  }
+
+  .keys-grid {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 48px;
+  }
+
+  .req-section {
+    padding: 56px 0 72px;
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+
+  .req-block pre {
+    margin-top: 14px;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--line);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px var(--edge) 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 720px) {
+    .topnav { display: none; }
+    .intro { padding: 44px 0 32px; }
+    h1 { font-size: clamp(2rem, 9vw, 2.6rem) !important; }
+    .stat-strip { grid-template-columns: repeat(2, auto); row-gap: 24px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .keys-grid { grid-template-columns: 1fr; row-gap: 8px; }
+    .req-section { grid-template-columns: 1fr; }
+  }
+}
+
+@layer components {
+  .mark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+
+  .topnav {
+    display: flex;
+    gap: 28px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .topnav a {
+    color: var(--ink-dim);
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+    transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  .topnav a:hover, .topnav a:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  .mode-switch {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--line-strong);
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease);
+  }
+
+  .mode-switch:hover { border-color: var(--accent); }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(2.6rem, 5.6vw, 3.8rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  .intro-lede {
+    margin-top: 26px;
+    max-width: var(--measure);
+    font-size: 1.08rem;
+    color: var(--ink-dim);
+  }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 12px 20px;
+    border-radius: 3px;
+    border: 1px solid var(--line-strong);
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover, .btn-primary:focus-visible {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .btn-secondary:hover, .btn-secondary:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 600;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.7rem;
+    letter-spacing: -0.01em;
+  }
+
+  .section-note {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+
+  .feature-name {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .feature-cell h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  .feature-cell p {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    max-width: 46ch;
+  }
+
+  .panel-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 16px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel-name {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-desc {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+  }
+
+  .key-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    padding: 3px 7px;
+  }
+
+  .key-action {
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+  }
+
+  .req-block h3 {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .req-block ul {
+    margin: 14px 0 0;
+    padding-left: 20px;
+    color: var(--ink-dim);
+    display: grid;
+    gap: 8px;
+  }
+
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+
+  .site-footer a {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .site-footer a:hover, .site-footer a:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <a class="mark" href="#top">Cysra Anome</a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="#features">features</a>
+      <a href="#panel">side panel</a>
+      <a href="#get">get it</a>
+      <a href="https://github.com/muhabbetkusudayi/Cysra-Anome" target="_blank" rel="noopener">source</a>
+    </nav>
+    <button class="mode-switch" id="modeSwitch" type="button" aria-pressed="false">
+      <span id="modeSwitchLabel">dark</span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="intro">
+    <p class="eyebrow">desktop browser — pyqt5 + qtwebengine</p>
+    <h1>A Chromium browser<br>you can actually read.</h1>
+    <p class="intro-lede">
+      Cysra Anome is a PyQt5 desktop browser with tabbed and private browsing,
+      a request-layer ad blocker, a fuzzy command palette, and a side panel of
+      small built-in apps. Open source, MIT licensed, and built to be read and
+      extended rather than reverse-engineered.
+    </p>
+    <div class="get-row" id="get">
+      <a class="btn btn-primary" href="https://github.com/muhabbetkusudayi/Cysra-Anome" target="_blank" rel="noopener">Get it on Windows</a>
+      <a class="btn btn-secondary" href="https://github.com/muhabbetkusudayi/Cysra-Anome" target="_blank" rel="noopener">View source ↗</a>
+    </div>
+  </section>
+
+  <section class="stat-strip">
+    <div class="stat">
+      <span class="stat-num">8.0</span>
+      <span class="stat-label">current version</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">MIT</span>
+      <span class="stat-label">license</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">9</span>
+      <span class="stat-label">panel apps</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">4</span>
+      <span class="stat-label">theme presets</span>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <div class="section-head">
+      <h2>What it does</h2>
+      <p class="section-note">the parts you'll actually touch</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-cell">
+        <span class="feature-name">browsing</span>
+        <h3>Chromium underneath</h3>
+        <p>Runs on QWebEngineView with tabbed browsing, private tabs, download management, and view-source support — a real rendering engine, not a wrapper around someone else's shell.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="feature-name">ad blocker</span>
+        <h3>Blocks at the request layer</h3>
+        <p>A QWebEngineUrlRequestInterceptor filters known ad and tracker domains plus common ad-serving path patterns, with a popup-blocking script injected alongside it. Toggle from the toolbar, Settings, or the command palette.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="feature-name">command palette</span>
+        <h3>Ctrl+K does most of it</h3>
+        <p>A fuzzy-searchable list of actions: navigation, tab switching, panel shortcuts, theme switching, adblock toggle, and a go-to-or-search fallback for anything else.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="feature-name">icons &amp; favicons</span>
+        <h3>No external icon files</h3>
+        <p>All UI chrome icons are inline SVG. Site favicons are fetched asynchronously and cached in memory, with a letter-avatar fallback when a site doesn't have one.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="feature-name">themes</span>
+        <h3>Four presets, fully applied</h3>
+        <p>Dark, Light, Red, and Blue — applied across the native UI and the new-tab page, and persisted between sessions in cysra_data.json.</p>
+      </div>
+      <div class="feature-cell">
+        <span class="feature-name">performance</span>
+        <h3>Four performance modes</h3>
+        <p>Lowest, Low, Medium, High — trading visual effects and caching for raw speed, depending on what the machine underneath can handle.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel" class="panel-section">
+    <div class="section-head">
+      <h2>Side panel</h2>
+      <p class="section-note">micro-apps, expandable</p>
+    </div>
+
+    <div class="panel-list">
+      <div class="panel-row">
+        <span class="panel-name">history</span>
+        <p class="panel-desc">Searchable, revisit any entry on double-click.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">downloads</span>
+        <p class="panel-desc">Live progress on everything in flight.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">password manager</span>
+        <p class="panel-desc">Master-password protected. Uses OS-native DPAPI on Windows; falls back to a keyed XOR cipher elsewhere. A basic-security convenience, not a hardened vault.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">calculator</span>
+        <p class="panel-desc">Exactly what it sounds like.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">web shortcuts</span>
+        <p class="panel-desc">An editable list of quick links.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">extensions</span>
+        <p class="panel-desc">Loads local .py plugins that expose an AppWidget class — see below.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">translate</span>
+        <p class="panel-desc">Via deep-translator, if you install the optional dependency.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">notes</span>
+        <p class="panel-desc">Plain text, saved to cysra_notes.txt next to the app.</p>
+      </div>
+      <div class="panel-row">
+        <span class="panel-name">settings</span>
+        <p class="panel-desc">Theme, performance mode, and the ad blocker toggle, in one place.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="keys-section">
+    <div class="section-head">
+      <h2>Keyboard shortcuts</h2>
+    </div>
+
+    <div class="keys-grid">
+      <div>
+        <div class="key-row"><kbd>Ctrl+T</kbd><span class="key-action">New tab</span></div>
+        <div class="key-row"><kbd>Ctrl+Shift+N</kbd><span class="key-action">New private tab</span></div>
+        <div class="key-row"><kbd>Ctrl+W</kbd><span class="key-action">Close current tab</span></div>
+        <div class="key-row"><kbd>Ctrl+L</kbd><span class="key-action">Focus address bar</span></div>
+        <div class="key-row"><kbd>Ctrl+D</kbd><span class="key-action">Toggle favorite</span></div>
+        <div class="key-row"><kbd>Ctrl+K</kbd><span class="key-action">Open command palette</span></div>
+      </div>
+      <div>
+        <div class="key-row"><kbd>Ctrl+H</kbd><span class="key-action">Open history</span></div>
+        <div class="key-row"><kbd>Ctrl+J</kbd><span class="key-action">Open downloads</span></div>
+        <div class="key-row"><kbd>Ctrl+R</kbd><span class="key-action">Reload</span></div>
+        <div class="key-row"><kbd>Ctrl+U</kbd><span class="key-action">View page source</span></div>
+        <div class="key-row"><kbd>Alt+←/→</kbd><span class="key-action">Back / forward</span></div>
+        <div class="key-row"><kbd>Alt+Home</kbd><span class="key-action">Go home</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="req-section">
+    <div class="req-block">
+      <h3>Requirements</h3>
+      <ul>
+        <li>Python 3.9+</li>
+        <li>PyQt5 with QtWebEngine</li>
+        <li>deep-translator, optional, for the Translate panel</li>
+      </ul>
+      <pre><code>pip install PyQt5 PyQtWebEngine</code></pre>
+    </div>
+    <div class="req-block">
+      <h3>Running on Windows</h3>
+      <ul>
+        <li>Clone or download the repository from GitHub</li>
+        <li>Install the requirements above</li>
+        <li>Run main.py, or use build.bat to produce a standalone .exe</li>
+      </ul>
+      <pre><code>python main.py</code></pre>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Cysra Anome — MIT licensed, built in the open.</p>
+  <a href="https://github.com/muhabbetkusudayi/Cysra-Anome" target="_blank" rel="noopener">github.com/muhabbetkusudayi/Cysra-Anome</a>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('modeSwitch');
+  var label = document.getElementById('modeSwitchLabel');
+
+  function apply(theme) {
+    root.setAttribute('data-theme', theme);
+    if (btn) btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    if (label) label.textContent = theme === 'dark' ? 'light' : 'dark';
+  }
+
+  var stored = null;
+  try {
+    stored = localStorage.getItem('theme');
+  } catch (e) {
+    stored = null;
+  }
+
+  var preferred = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  apply(preferred);
+
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      apply(next);
+      try {
+        localStorage.setItem('theme', next);
+      } catch (e) {}
+    });
+  }
+})();
+</script>
+</body>
+</html>
